@@ -43,7 +43,15 @@ class Board extends React.Component {
 function ShowAnswerButton(props) {
   return (
     <button className='show-answer-button' onClick={props.onClick}>
-      Show answer
+      Show Answer
+    </button>
+  );
+}
+
+function NewGameButton(props) {
+  return (
+    <button className='new-game-button' onClick={props.onClick}>
+      New Game
     </button>
   );
 }
@@ -57,7 +65,7 @@ class Game extends React.Component {
     }
 
     this.state = {
-      viewableBoard: viewableBoard,
+      viewableBoard: initializeViewableBoard(this.props.rows, this.props.cols),
       hiddenBoard: initializeHiddenBoard(
         this.props.rows,
         this.props.cols,
@@ -92,6 +100,19 @@ class Game extends React.Component {
     }
   }
 
+  handleNewGameButtonClick() {
+    this.setState({
+      viewableBoard: initializeViewableBoard(this.props.rows, this.props.cols),
+      hiddenBoard: initializeHiddenBoard(
+        this.props.rows,
+        this.props.cols,
+        this.props.mines
+      ),
+      gameWon: null,
+      showHidden: false,
+    });
+  }
+
   renderBoard() {
     return (
       <Board
@@ -117,6 +138,7 @@ class Game extends React.Component {
         <div className="win-or-lose">{winOrLoseText}</div>
         {this.renderBoard()}
         <ShowAnswerButton onClick={() => this.handleShowAnswerButtonClick()} />
+        <NewGameButton onClick={() => this.handleNewGameButtonClick()} />
       </div>
     );
   }
@@ -160,6 +182,15 @@ function calculateAdjacentMines(board, x, y) {
   }
 
   return count;
+}
+
+function initializeViewableBoard(numRows, numCols) {
+  let viewableBoard = new Array(parseInt(numRows));
+  for (let i = 0; i < numRows; i++) {
+    viewableBoard[i] = (new Array(parseInt(numCols))).fill('-');
+  }
+
+  return viewableBoard;
 }
 
 function initializeHiddenBoard(numRows, numCols, numMines) {
