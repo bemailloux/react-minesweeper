@@ -84,20 +84,16 @@ class Game extends React.Component {
     }
 
     // otherwise show the number we clicked on
-    let board = this.state.viewableBoard;
-    board[x][y] = this.state.hiddenBoard[x][y];
-    if (checkVictoryCondition(board, this.state.hiddenBoard)) {
+    let viewableBoard = showClickedSquares(this.state.viewableBoard, this.state.hiddenBoard, x, y);
+    if (checkVictoryCondition(viewableBoard, this.state.hiddenBoard)) {
       this.setState({gameWon: true});
     }
 
-    this.setState({viewableBoard: board});
+    this.setState({viewableBoard: viewableBoard});
   }
 
   handleShowAnswerButtonClick() {
     this.setState({showHidden: true});
-    for (let i = 0; i < this.props.rows; i++) {
-      console.log(this.state.hiddenBoard[i].join(''));
-    }
   }
 
   handleNewGameButtonClick() {
@@ -224,6 +220,32 @@ function initializeHiddenBoard(numRows, numCols, numMines) {
   }
 
   return board;
+}
+
+function showClickedSquares(viewableBoard, hiddenBoard, x, y) {
+  // if we already checked this square, don't bother checking it again
+  if (viewableBoard[x][y] !== '-') return viewableBoard;
+  viewableBoard[x][y] = hiddenBoard[x][y];
+
+  // do recursive "zero expansion"
+  if (hiddenBoard[x][y] === 0) {
+    if (x > 0) {
+      if (y > 0) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x-1, y-1);
+      viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x-1, y);
+      if (y < viewableBoard[0].length-1) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x-1, y+1);
+    }
+
+    if (y > 0) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x, y-1);
+    if (y < viewableBoard[0].length-1) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x, y+1);
+
+    if (x < viewableBoard.length-1) {
+      if (y > 0) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x+1, y-1);
+      viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x+1, y);
+      if (y < viewableBoard[0].length-1) viewableBoard = showClickedSquares(viewableBoard, hiddenBoard, x+1, y+1);
+    }
+  }
+
+  return viewableBoard;
 }
 
 function checkVictoryCondition(viewableBoard, hiddenBoard) {
