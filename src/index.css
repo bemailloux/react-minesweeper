@@ -9,11 +9,9 @@
   float: left;
   font-size: 16px;
   font-weight: bold;
-  /* line-height: 34px; */
   height: 25px;
   margin-right: -1px;
   margin-top: -1px;
-  /* padding-top: -10px; */
   text-align: center;
   width: 25px;
   background: #bbb;
@@ -43,7 +41,7 @@
 }
 
 .bg-color2 {
-  color: #0d0;
+  color: #0b0;
 }
 
 .bg-color3 {
@@ -83,5 +81,9 @@
 }
 
 .show-answer-button {
+  margin: 10px;
+}
+
+.difficulty-picker {
   margin: 10px;
 }

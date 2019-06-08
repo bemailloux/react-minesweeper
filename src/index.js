@@ -63,22 +63,37 @@ function NewGameButton(props) {
   );
 }
 
+function DifficultyPicker(props) {
+  return (
+    <select
+      className="difficulty-picker"
+      defaultValue="beginner"
+      onChange={(e) => { props.onChange(e.target.value); }}
+    >
+      <option value="beginner">Beginner</option>
+      <option value="intermediate">Intermediate</option>
+      <option value="expert">Expert</option>
+    </select>
+  );
+}
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    let viewableBoard = new Array(parseInt(this.props.rows));
-    for (let i = 0; i < this.props.rows; i++) {
-      viewableBoard[i] = (new Array(parseInt(this.props.cols))).fill(logic.SquareValueEnum['unknown']);
-    }
+    let rows = 10, cols = 10, mines = 10;
     this.timer = null;
 
     this.state = {
-      viewableBoard: logic.initializeViewableBoard(this.props.rows, this.props.cols),
+      rows: rows,
+      cols: cols,
+      mines: mines,
+      viewableBoard: logic.initializeViewableBoard(rows, cols),
       hiddenBoard: null,
       showHidden: false,
       gameWon: null,
       time: 0,
       isNewGame: true,
+      difficulty: 'beginner',
     }
   }
 
@@ -89,9 +104,9 @@ class Game extends React.Component {
       // so initialize a new board until the square that the user clicked on is a "zero" square
       do {
         hiddenBoard = logic.initializeHiddenBoard(
-          this.props.rows,
-          this.props.cols,
-          this.props.mines
+          this.state.rows,
+          this.state.cols,
+          this.state.mines
         );
       } while (hiddenBoard[x][y] !== logic.SquareValueEnum['0']);
       this.setState({ hiddenBoard: hiddenBoard, isNewGame: false });
@@ -134,19 +149,33 @@ class Game extends React.Component {
     this.setState({viewableBoard: viewableBoard});
   }
 
-  handleShowAnswerButtonClick() {
+  showAnswer() {
     this.setState({showHidden: true, gameWon: false});
     clearInterval(this.timer);
   }
 
-  handleNewGameButtonClick() {
+  startNewGame(difficulty) {
+    let gameParams = null;
+    difficulty = difficulty || this.state.difficulty;
+    if (difficulty === 'beginner') {
+      gameParams = { rows: 10, cols: 10, mines: 10 };
+    } else if (difficulty === 'intermediate') {
+      gameParams = { rows: 16, cols: 16, mines: 40 };
+    } else if (difficulty === 'expert') {
+      gameParams = { rows: 16, cols: 30, mines: 99 };
+    }
+
     this.setState({
-      viewableBoard: logic.initializeViewableBoard(this.props.rows, this.props.cols),
+      rows: gameParams.rows,
+      cols: gameParams.cols,
+      mines: gameParams.mines,
+      viewableBoard: logic.initializeViewableBoard(gameParams.rows, gameParams.cols),
       hiddenBoard: null,
       gameWon: null,
       showHidden: false,
       time: 0,
       isNewGame: true,
+      difficulty: difficulty,
     });
     clearInterval(this.timer);
 
@@ -156,9 +185,9 @@ class Game extends React.Component {
   renderBoard() {
     return (
       <Board
-        rows={this.props.rows}
-        cols={this.props.cols}
-        mines={this.props.mines}
+        rows={this.state.rows}
+        cols={this.state.cols}
+        mines={this.state.mines}
         board={this.state.showHidden ? this.state.hiddenBoard : this.state.viewableBoard}
         btnClick={(x, y) => this.handleButtonClick(x, y)}
         btnRightClick={(x, y) => this.handleButtonRightClick(x, y)}
@@ -167,7 +196,7 @@ class Game extends React.Component {
   }
 
   componentDidMount() {
-    this.timer = setInterval(() => {this.setState({time: this.state.time + 1})}, 1000);
+    this.startNewGame();
   }
 
   render() {
@@ -183,11 +212,11 @@ class Game extends React.Component {
       <div>
         {this.renderBoard()}
         <div className="win-or-lose">{winOrLoseText}</div>
-        <ShowAnswerButton onClick={() => this.handleShowAnswerButtonClick()} />
-        <NewGameButton onClick={() => this.handleNewGameButtonClick()} />
+        <NewGameButton onClick={() => this.startNewGame()} />
+        <DifficultyPicker onChange={(difficulty) => this.startNewGame(difficulty) } />
       </div>
     );
   }
 }
 
-ReactDOM.render(<Game rows='10' cols='10' mines='10'/>, document.getElementById('root'));
+ReactDOM.render(<Game/>, document.getElementById('root'));
