@@ -1,3 +1,7 @@
+body {
+  font-family: sans-serif;
+}
+
 .board-row:after {
   clear: both;
   content: "";
@@ -85,5 +89,9 @@
 }
 
 .difficulty-picker {
+  margin: 10px;
+}
+
+.flag-counter {
   margin: 10px;
 }

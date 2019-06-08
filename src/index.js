@@ -94,6 +94,7 @@ class Game extends React.Component {
       time: 0,
       isNewGame: true,
       difficulty: 'beginner',
+      flagsLeft: mines,
     }
   }
 
@@ -139,14 +140,19 @@ class Game extends React.Component {
   handleButtonRightClick(x, y) {
     // add flag when user right clicks
     let viewableBoard = this.state.viewableBoard;
+    let flagsLeft = this.state.flagsLeft;
+
     // only allow right clicks on empty squares and flag squares
-    if (viewableBoard[x][y] === logic.SquareValueEnum['unknown']) {
+    // don't let the user place a flag if they have none left
+    if (viewableBoard[x][y] === logic.SquareValueEnum['unknown'] && flagsLeft > 0) {
       viewableBoard[x][y] = logic.SquareValueEnum['flag'];
+      flagsLeft--;
     } else if (viewableBoard[x][y] === logic.SquareValueEnum['flag']) {
       viewableBoard[x][y] = logic.SquareValueEnum['unknown'];
+      flagsLeft++;
     }
 
-    this.setState({viewableBoard: viewableBoard});
+    this.setState({viewableBoard: viewableBoard, flagsLeft: flagsLeft});
   }
 
   showAnswer() {
@@ -176,6 +182,7 @@ class Game extends React.Component {
       time: 0,
       isNewGame: true,
       difficulty: difficulty,
+      flagsLeft: gameParams.mines,
     });
     clearInterval(this.timer);
 
@@ -210,8 +217,10 @@ class Game extends React.Component {
 
     return (
       <div>
+        <h1>Minesweeper</h1>
         {this.renderBoard()}
         <div className="win-or-lose">{winOrLoseText}</div>
+        <div className='flag-counter'>{'Mines remaining: ' + this.state.flagsLeft}</div>
         <NewGameButton onClick={() => this.startNewGame()} />
         <DifficultyPicker onChange={(difficulty) => this.startNewGame(difficulty) } />
       </div>
