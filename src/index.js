@@ -50,7 +50,7 @@ class Board extends React.Component {
 function ShowAnswerButton(props) {
   return (
     <button className='show-answer-button' onClick={props.onClick}>
-      Show Answer
+      Show Answer [Debug]
     </button>
   );
 }
@@ -74,36 +74,46 @@ class Game extends React.Component {
 
     this.state = {
       viewableBoard: logic.initializeViewableBoard(this.props.rows, this.props.cols),
-      hiddenBoard: logic.initializeHiddenBoard(
-        this.props.rows,
-        this.props.cols,
-        this.props.mines
-      ),
+      hiddenBoard: null,
       showHidden: false,
       gameWon: null,
       time: 0,
-
+      isNewGame: true,
     }
   }
 
   handleButtonClick(x, y) {
+    let hiddenBoard = this.state.hiddenBoard;
+    if (this.state.isNewGame) {
+      // every beginning of the game has to start with the user clicking on a "zero" square
+      // so initialize a new board until the square that the user clicked on is a "zero" square
+      do {
+        hiddenBoard = logic.initializeHiddenBoard(
+          this.props.rows,
+          this.props.cols,
+          this.props.mines
+        );
+      } while (hiddenBoard[x][y] !== logic.SquareValueEnum['0']);
+      this.setState({ hiddenBoard: hiddenBoard, isNewGame: false });
+    }
+
     // if we click on a square with a flag on it, do nothing
     if (this.state.viewableBoard[x][y] === logic.SquareValueEnum['flag']) {
       return;
     }
 
     // if we clicked on a mine, then game over and show the entire board
-    if (this.state.hiddenBoard[x][y] === logic.SquareValueEnum['mine']) {
+    if (hiddenBoard[x][y] === logic.SquareValueEnum['mine']) {
       this.setState({showHidden: true, gameWon: false});
       clearInterval(this.timer);
       return;
     }
 
     // otherwise show the number we clicked on
-    let viewableBoard = logic.showClickedSquares(this.state.viewableBoard, this.state.hiddenBoard, x, y);
+    let viewableBoard = logic.showClickedSquares(this.state.viewableBoard, hiddenBoard, x, y);
 
     // check if we won the game
-    if (logic.checkVictoryCondition(viewableBoard, this.state.hiddenBoard)) {
+    if (logic.checkVictoryCondition(viewableBoard, hiddenBoard)) {
       this.setState({gameWon: true});
       clearInterval(this.timer);
     }
@@ -132,14 +142,11 @@ class Game extends React.Component {
   handleNewGameButtonClick() {
     this.setState({
       viewableBoard: logic.initializeViewableBoard(this.props.rows, this.props.cols),
-      hiddenBoard: logic.initializeHiddenBoard(
-        this.props.rows,
-        this.props.cols,
-        this.props.mines
-      ),
+      hiddenBoard: null,
       gameWon: null,
       showHidden: false,
       time: 0,
+      isNewGame: true,
     });
     clearInterval(this.timer);
 
