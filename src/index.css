@@ -5,7 +5,6 @@
 }
 
 .square {
-  background: #fff;
   border: 1px solid #999;
   float: left;
   font-size: 24px;
@@ -17,6 +16,49 @@
   padding: 0;
   text-align: center;
   width: 34px;
+  background: #bbb;
+}
+
+.bg-color, .bg-color- {
+  color: #fff;
+  background: #fff;
+}
+
+.bg-colorx {
+  background: #000;
+  color: #fff;
+}
+
+.bg-color1 {
+  color: #00f;
+}
+
+.bg-color2 {
+  color: #0d0;
+}
+
+.bg-color3 {
+  color: #f00;
+}
+
+.bg-color3 {
+  color: #f00;
+}
+
+.bg-color4 {
+  color: #b00;
+}
+
+.bg-color5 {
+  color: #b00;
+}
+
+.bg-color6 {
+  color: #0ff;
+}
+
+.bg-color7, .bg-color8, .bg-color9 {
+  color: #000;
 }
 
 .square:focus {

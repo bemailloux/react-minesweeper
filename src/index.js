@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
   return (
-    <button className='square' onClick={props.onClick}>
+    <button className={'square bg-color' + props.value} onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -16,7 +16,13 @@ class Board extends React.Component {
     for (let i = 0; i < this.props.rows; i++) {
       let cols = [];
       for (let j = 0; j < this.props.cols; j++) {
-        cols.push(<Square key={j} value={this.props.board[i][j]}/>);
+        cols.push(
+          <Square
+            key={i + ' ' + j}
+            value={this.props.board[i][j]}
+            onClick={() => this.props.btnClick(i,j)}
+          />
+        );
       }
 
       rows.push(
@@ -47,7 +53,7 @@ class Game extends React.Component {
     super(props);
     let viewableBoard = new Array(parseInt(this.props.rows));
     for (let i = 0; i < this.props.rows; i++) {
-      viewableBoard[i] = new Array(parseInt(this.props.cols));
+      viewableBoard[i] = (new Array(parseInt(this.props.cols))).fill('-');
     }
 
     this.state = {
@@ -58,7 +64,25 @@ class Game extends React.Component {
         this.props.mines
       ),
       showHidden: false,
+      gameWon: null,
     }
+  }
+
+  handleButtonClick(x, y) {
+    // if we clicked on a mine, then show the entire board
+    if (this.state.hiddenBoard[x][y] === 'x') {
+      this.setState({showHidden: true, gameWon: false});
+      return;
+    }
+
+    // otherwise show the number we clicked on
+    let board = this.state.viewableBoard;
+    board[x][y] = this.state.hiddenBoard[x][y];
+    if (checkVictoryCondition(board, this.state.hiddenBoard)) {
+      this.setState({gameWon: true});
+    }
+
+    this.setState({viewableBoard: board});
   }
 
   handleShowAnswerButtonClick() {
@@ -75,13 +99,22 @@ class Game extends React.Component {
         cols={this.props.cols}
         mines={this.props.mines}
         board={this.state.showHidden ? this.state.hiddenBoard : this.state.viewableBoard}
+        btnClick={(x, y) => this.handleButtonClick(x, y)}
       />
     );
   }
 
   render() {
+    let winOrLoseText = '';
+    if (this.state.gameWon === true) {
+      winOrLoseText = 'You won! :)';
+    } else if (this.state.gameWon === false) {
+      winOrLoseText = 'Game over! X(';
+    }
+
     return (
       <div>
+        <div className="win-or-lose">{winOrLoseText}</div>
         {this.renderBoard()}
         <ShowAnswerButton onClick={() => this.handleShowAnswerButtonClick()} />
       </div>
@@ -160,4 +193,16 @@ function initializeHiddenBoard(numRows, numCols, numMines) {
   }
 
   return board;
+}
+
+function checkVictoryCondition(viewableBoard, hiddenBoard) {
+  let verifyBoard = hiddenBoard.map((row) => {
+    return row.map((item) => { return item === 'x' ? '-' : item; });
+  });
+
+  return verifyBoard.every((row, i) => {
+    return row.every((val, j) => {
+      return val === viewableBoard[i][j];
+    });
+  });
 }
